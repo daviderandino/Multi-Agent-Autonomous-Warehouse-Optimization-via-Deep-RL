@@ -4,6 +4,8 @@ import matplotlib.patches as patches
 import matplotlib.animation as animation
 import random
 import os
+import pickle  
+import argparse
 
 # ==========================================
 # 1. CONFIGURATION & HYPERPARAMETERS
@@ -171,6 +173,21 @@ class QLearningAgent:
     def decay_epsilon(self):
         self.epsilon = max(EPSILON_MIN, self.epsilon * EPSILON_DECAY)
 
+    def save_model(self, filename):
+        """Salva la Q-Table su file."""
+        with open(filename, 'wb') as f:
+            pickle.dump(self.q_table, f)
+        print(f"💾 Model saved to {filename}")
+
+    def load_model(self, filename):
+        """Carica la Q-Table da file."""
+        if os.path.exists(filename):
+            with open(filename, 'rb') as f:
+                self.q_table = pickle.load(f)
+            print(f"📂 Model loaded from {filename}")
+        else:
+            print(f"⚠️ Warning: Model file {filename} not found! Starting from scratch.")
+
 # ==========================================
 # 4. TRAINING LOOP
 # ==========================================
@@ -296,6 +313,47 @@ def plot_learning(history):
         print("📈 Learning curve saved.")
 
 if __name__ == "__main__":
-    trained_a1, trained_a2, history = train()
-    # plot_learning(history)
-    run_demo(trained_a1, trained_a2)
+    # Configurazione Argomenti da Terminale
+    parser = argparse.ArgumentParser(description='Warehouse RL Agent')
+    parser.add_argument('--mode', type=str, default='train', choices=['train', 'demo'], 
+                        help='Scegli "train" per addestrare o "demo" per vedere il risultato')
+    
+    args = parser.parse_args()
+
+    # Nomi dei file dove salvare i "cervelli"
+    model_file_1 = os.path.join(OUTPUT_DIR, "agent_1_qtable.pkl")
+    model_file_2 = os.path.join(OUTPUT_DIR, "agent_2_qtable.pkl")
+
+    if args.mode == 'train':
+        # --- FASE DI TRAINING ---
+        # 1. Addestra
+        # Nota: Assicurati di aver corretto il bug del reward hacking prima di lanciare questo!
+        trained_a1, trained_a2, history = train() 
+        
+        # 2. Salva i modelli
+        trained_a1.save_model(model_file_1)
+        trained_a2.save_model(model_file_2)
+        
+        # 3. Salva il grafico (opzionale se hai la funzione plot)
+        if 'plot_learning' in globals():
+            plot_learning(history)
+
+    elif args.mode == 'demo':
+        # --- FASE DI DEMO ---
+        print("🚀 Loading models for Demo...")
+        
+        # 1. Crea agenti vuoti
+        demo_agent_1 = QLearningAgent()
+        demo_agent_2 = QLearningAgent()
+        
+        # 2. Carica la memoria dai file
+        demo_agent_1.load_model(model_file_1)
+        demo_agent_2.load_model(model_file_2)
+        
+        # 3. Lancia la demo
+        run_demo(demo_agent_1, demo_agent_2)
+
+
+
+# python main.py --mode train
+# python main.py --mode demo

@@ -32,7 +32,7 @@ Blue and Red agents navigating a bottleneck to reach their respective goals (G1,
 2. The Agent (DQN)
 
     Each agent operates an independent Neural Network.
-    - Architecture: 3-Layer Fully Connected Network (Input $\to$ 128 $\to$ 128 $\to$ Output).
+    - Architecture: 3-Layer Fully Connected Network (Input $\to$ 256 $\to$ 256 $\to$ Output).
     - Loss Function: Mean Squared Error (MSE) between Current Q and Target Q.
     - Optimizer: Adam ($\alpha=0.001$).
 
@@ -56,7 +56,7 @@ Ensure you have Python 3.8+ installed.
 
 <b> Training the Agents </b>
 
-To train the agents from scratch. This uses an Epsilon-Greedy strategy to balance exploration and exploitation. Training typically converges within 1000-2000 episodes.
+To train the agents from scratch. This uses an Epsilon-Greedy strategy to balance exploration and exploitation. 
 
 
 
